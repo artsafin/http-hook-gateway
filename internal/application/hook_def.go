@@ -1,7 +1,7 @@
-package structs
+package application
 
 import (
-	"http-hook-gateway/internal/parser"
+	"http-hook-gateway/internal/requestfile"
 	"net/http"
 	"os"
 	"regexp"
@@ -13,7 +13,7 @@ type HookDef struct {
 	ProxyHost      string
 	ProxyPath      string
 	RequestFile    string
-	rawRequests    parser.RequestProvider
+	rawRequest     requestfile.RequestFile
 }
 
 func (d *HookDef) MatchesAcceptUrl(acceptUrl string) bool {
@@ -22,14 +22,19 @@ func (d *HookDef) MatchesAcceptUrl(acceptUrl string) bool {
 	return err != nil && matches
 }
 
-func (d *HookDef) ParseRequest(req *http.Request) (parser.RequestProvider, error) {
-	if d.rawRequests == nil {
+func (d *HookDef) ParseRequest(req *http.Request) (requestfile.RequestFile, error) {
+	if d.rawRequest == nil {
 		if parseErr := d.parseFile(); parseErr != nil {
 			return nil, parseErr
 		}
 	}
 
-	return nil, nil
+	summary, summaryErr := NewSummaryFromHttp(req)
+	if summaryErr != nil {
+		return nil, summaryErr
+	}
+
+	return transformRequestfile(d.rawRequest, summary)
 }
 
 func (d *HookDef) parseFile() error {
@@ -40,7 +45,7 @@ func (d *HookDef) parseFile() error {
 	defer file.Close()
 
 	var err error
-	d.rawRequests, err = parser.ParseFromReader(file)
+	d.rawRequest, err = requestfile.ParseFromReader(file)
 
 	return err
 }

@@ -1,4 +1,4 @@
-package parser
+package requestfile
 
 import (
 	"bufio"
@@ -14,22 +14,22 @@ const (
 	TokenBody
 )
 
-var _ RequestProvider = &requestFile{}
+var _ RequestFile = &requestFileParsed{}
 
-type requestFile struct {
+type requestFileParsed struct {
 	path    string
 	method  string
 	headers map[string]string
 	body    strings.Builder
 }
 
-func NewRequestFile() *requestFile {
-	return &requestFile{
+func NewRequestFile() *requestFileParsed {
+	return &requestFileParsed{
 		headers: make(map[string]string),
 	}
 }
 
-func (r *requestFile) Path(defaultPath string) string {
+func (r *requestFileParsed) Path(defaultPath string) string {
 	if len(r.path) == 0 {
 		return defaultPath
 	}
@@ -37,27 +37,27 @@ func (r *requestFile) Path(defaultPath string) string {
 	return r.path
 }
 
-func (r *requestFile) Method() string {
+func (r *requestFileParsed) Method() string {
 	return r.method
 }
 
-func (r *requestFile) Headers() map[string]string {
+func (r *requestFileParsed) Headers() map[string]string {
 	return r.headers
 }
 
-func (r *requestFile) Body() io.Reader {
+func (r *requestFileParsed) Body() io.Reader {
 	return strings.NewReader(r.body.String())
 }
 
-func (r *requestFile) setHeader(key, val string) {
+func (r *requestFileParsed) setHeader(key, val string) {
 	r.headers[key] = val
 }
 
-func (r *requestFile) addBodyLine(ln string) {
+func (r *requestFileParsed) addBodyLine(ln string) {
 	r.body.WriteString(ln + "\n")
 }
 
-func ParseFromReader(reader io.Reader) (RequestProvider, error) {
+func ParseFromReader(reader io.Reader) (RequestFile, error) {
 	scanner := bufio.NewScanner(reader)
 	scanner.Split(bufio.ScanLines)
 

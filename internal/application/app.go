@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"go.uber.org/zap"
 	"http-hook-gateway/internal/config"
-	"http-hook-gateway/internal/structs"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -20,7 +19,7 @@ const (
 var ErrInitError = errors.New("init error")
 
 type app struct {
-	hooks      structs.HookMap
+	hooks      HookMap
 	httpClient *http.Client
 	logger     *zap.Logger
 }
@@ -78,7 +77,7 @@ func (app *app) RootHandler(w http.ResponseWriter, req *http.Request) {
 	app.logger.Info("HTTP request handler exited")
 }
 
-func (app *app) proxy(req *http.Request, hookDef *structs.HookDef) (Err error) {
+func (app *app) proxy(req *http.Request, hookDef *HookDef) (Err error) {
 	logger := app.logger.Named(fmt.Sprintf("%v %v", hookDef.Name, req.URL.Path))
 	logger = logger.With(zap.Any("hook", hookDef))
 

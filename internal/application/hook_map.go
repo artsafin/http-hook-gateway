@@ -1,4 +1,4 @@
-package structs
+package application
 
 type HookMap map[string]*HookDef
 

@@ -1,7 +1,7 @@
 package config
 
 import (
-	"http-hook-gateway/internal/structs"
+	"http-hook-gateway/internal/application"
 	"os"
 	"strings"
 )
@@ -11,8 +11,8 @@ const (
 	SectionSeparator  = "."
 )
 
-func LoadFromEnv(prefix string) structs.HookMap {
-	hookmap := make(structs.HookMap)
+func LoadFromEnv(prefix string) application.HookMap {
+	hookmap := make(application.HookMap)
 
 	normPrefix := strings.Trim(prefix, SectionSeparator) + SectionSeparator
 
@@ -28,9 +28,9 @@ func LoadFromEnv(prefix string) structs.HookMap {
 		}
 
 		var ok bool
-		var hook *structs.HookDef
+		var hook *application.HookDef
 		if hook, ok = hookmap[section]; !ok {
-			hook = &structs.HookDef{Name: section}
+			hook = &application.HookDef{Name: section}
 			hookmap[section] = hook
 		}
 		assignParamValue(hook, key, value)
@@ -39,7 +39,7 @@ func LoadFromEnv(prefix string) structs.HookMap {
 	return hookmap
 }
 
-func assignParamValue(def *structs.HookDef, param, value string) {
+func assignParamValue(def *application.HookDef, param, value string) {
 	switch param {
 	case "accept_url_regex":
 		def.AcceptUrlRegex = value
