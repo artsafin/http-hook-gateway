@@ -1,6 +1,7 @@
 package application
 
 import (
+	"encoding/json"
 	"http-hook-gateway/internal/requestfile"
 	"io"
 	"io/ioutil"
@@ -8,23 +9,23 @@ import (
 	"text/template"
 )
 
-func transformRequestfile(src requestfile.RequestFile, summary RequestSummary) (requestfile.RequestFile, error) {
-	method, methodErr := renderString("method", src.Method(), &summary)
+func interpolateRequestfile(src requestfile.RequestFile, data *RequestSummary) (requestfile.RequestFile, error) {
+	method, methodErr := renderString("method", src.Method(), data)
 	if methodErr != nil {
 		return nil, methodErr
 	}
 
-	path, pathErr := renderString("path", src.Path("/"), &summary)
+	path, pathErr := renderString("path", src.Path("/"), data)
 	if pathErr != nil {
 		return nil, pathErr
 	}
 
-	headers, headersErr := renderMap("headers", src.Headers(), &summary)
+	headers, headersErr := renderMap("headers", src.Headers(), data)
 	if headersErr != nil {
 		return nil, headersErr
 	}
 
-	body, bodyErr := renderReader("body", src.Body(), &summary)
+	body, bodyErr := renderReader("body", src.Body(), data)
 	if bodyErr != nil {
 		return nil, bodyErr
 	}
@@ -34,9 +35,30 @@ func transformRequestfile(src requestfile.RequestFile, summary RequestSummary) (
 	return dto, nil
 }
 
+func newTpl(name string) *template.Template {
+	return template.New(name).Funcs(template.FuncMap{
+		"json": func(data interface{}) string {
+			bytes, jsonErr := json.Marshal(data)
+			if jsonErr != nil {
+				return ""
+			}
+			return string(bytes)
+		},
+		"query": func(data *RequestSummary, name string) string {
+			return data.Query.Get(name)
+		},
+		"header": func(data *RequestSummary, name string) string {
+			return data.Headers.Get(name)
+		},
+		"headervalues": func(data *RequestSummary, name string) string {
+			return strings.Join(data.Headers.Values(name), "; ")
+		},
+	})
+}
+
 func renderString(name, tpl string, summary *RequestSummary) (string, error) {
 	var b strings.Builder
-	err := template.Must(template.New(name).Parse(tpl)).Execute(&b, summary)
+	err := template.Must(newTpl(name).Parse(tpl)).Execute(&b, summary)
 	if err != nil {
 		return "", err
 	}
@@ -56,15 +78,15 @@ func renderMap(name string, m map[string]string, r *RequestSummary) (map[string]
 	return res, nil
 }
 
-func renderReader(name string, reader io.Reader, r *RequestSummary) (io.Reader, error) {
+func renderReader(name string, reader io.Reader, r *RequestSummary) (string, error) {
 	bytes, err := ioutil.ReadAll(reader)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	res, err := renderString(name, string(bytes), r)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return strings.NewReader(res), nil
+	return res, nil
 }

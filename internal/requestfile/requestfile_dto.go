@@ -2,16 +2,17 @@ package requestfile
 
 import (
 	"io"
+	"strings"
 )
 
 type dto struct {
 	method  string
 	path    string
 	headers map[string]string
-	body    io.Reader
+	body    string
 }
 
-func NewDto(method string, path string, headers map[string]string, body io.Reader) dto {
+func NewDto(method string, path string, headers map[string]string, body string) dto {
 	return dto{method: method, path: path, headers: headers, body: body}
 }
 
@@ -31,5 +32,5 @@ func (r dto) Headers() map[string]string {
 }
 
 func (r dto) Body() io.Reader {
-	return r.body
+	return strings.NewReader(r.body)
 }

@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"go.uber.org/zap"
-	"http-hook-gateway/internal/config"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -34,7 +33,7 @@ func NewApp(logger *zap.Logger) *app {
 }
 
 func (app *app) LoadConfig() error {
-	hooks := config.LoadFromEnv(AppConfigPrefix)
+	hooks := LoadFromEnv(AppConfigPrefix)
 
 	if len(hooks) == 0 {
 		app.logger.Fatal("No hooks loaded, nowhere to proxy")

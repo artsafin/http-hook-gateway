@@ -34,7 +34,7 @@ func (d *HookDef) ParseRequest(req *http.Request) (requestfile.RequestFile, erro
 		return nil, summaryErr
 	}
 
-	return transformRequestfile(d.rawRequest, summary)
+	return interpolateRequestfile(d.rawRequest, summary)
 }
 
 func (d *HookDef) parseFile() error {

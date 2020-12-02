@@ -67,7 +67,7 @@ func ParseFromReader(reader io.Reader) (RequestFile, error) {
 	for scanner.Scan() {
 		ln := scanner.Text()
 
-		if len(ln) > 0 && (ln[0] == '#' || ln[0:1] == "//") {
+		if len(ln) > 0 && ln[0] == '#' || len(ln) >= 2 && ln[0:2] == "//" {
 			continue
 		}
 		if len(ln) == 0 {

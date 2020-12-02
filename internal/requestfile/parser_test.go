@@ -3,6 +3,7 @@ package requestfile
 import (
 	"errors"
 	"fmt"
+	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"strings"
 	"testing"
@@ -171,6 +172,19 @@ func TestParseFromReader_Good(t *testing.T) {
 			body:    "{\"foo\": 123}\n",
 		},
 		{
+			input: `# Comment on first line
+POST /some/path
+
+// This is comment on body
+{"foo": 123}
+// Last line
+`,
+			method:  "POST",
+			path:    "/some/path",
+			headers: map[string]string{},
+			body:    "{\"foo\": 123}\n",
+		},
+		{
 			input: `POST
 Content-Type: application/json
 X-Some-Header: hello
@@ -179,13 +193,13 @@ X-Some-Header: hello
 	"foo": 123,
 	"multiline": "easy"
 }`,
-			method:  "POST",
-			path:    TestDefaultPath,
+			method: "POST",
+			path:   TestDefaultPath,
 			headers: map[string]string{
-				"Content-Type": "application/json",
+				"Content-Type":  "application/json",
 				"X-Some-Header": "hello",
 			},
-			body:    `{
+			body: `{
 	"foo": 123,
 	"multiline": "easy"
 }
@@ -202,36 +216,12 @@ X-Some-Header: hello
 				return
 			}
 
-			if req.Method() != tt.method {
-				t.Errorf("method: got `%v`, want `%v`", req.Method(), tt.method)
-			}
-
-			if req.Path(TestDefaultPath) != tt.path {
-				t.Errorf("path: got `%v`, want `%v`", req.Path(TestDefaultPath), tt.path)
-			}
-
-			gotHeaders := req.Headers()
-			for wantK, wantV := range tt.headers {
-				var actualV string
-				var found bool
-				if actualV, found = gotHeaders[wantK]; !found {
-					t.Errorf("headers: didn't return expected key: %v", wantK)
-					continue
-				}
-				if wantV != actualV {
-					t.Errorf("headers: unexpected value for key %v: got `%v`, want `%v`", wantK, actualV, wantV)
-				}
-				delete(gotHeaders, wantK)
-			}
-			if len(gotHeaders) > 0 {
-				t.Errorf("headers: got unexpected headers: %v", gotHeaders)
-			}
+			assert.Equal(t, tt.method, req.Method())
+			assert.Equal(t, tt.path, req.Path(TestDefaultPath))
+			assert.Equal(t, tt.headers, req.Headers())
 
 			bodyBytes, _ := ioutil.ReadAll(req.Body())
-
-			if string(bodyBytes) != tt.body {
-				t.Errorf("body: got `%s`, want `%v`", bodyBytes, tt.body)
-			}
+			assert.Equal(t, tt.body, string(bodyBytes))
 		})
 	}
 }

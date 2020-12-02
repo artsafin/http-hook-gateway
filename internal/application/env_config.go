@@ -1,7 +1,6 @@
-package config
+package application
 
 import (
-	"http-hook-gateway/internal/application"
 	"os"
 	"strings"
 )
@@ -11,12 +10,16 @@ const (
 	SectionSeparator  = "."
 )
 
-func LoadFromEnv(prefix string) application.HookMap {
-	hookmap := make(application.HookMap)
+func LoadFromEnv(prefix string) HookMap {
+	return loadFromEnvPairs(prefix, os.Environ())
+}
+
+func loadFromEnvPairs(prefix string, pairs []string) HookMap {
+	hookmap := make(HookMap)
 
 	normPrefix := strings.Trim(prefix, SectionSeparator) + SectionSeparator
 
-	for _, kv := range os.Environ() {
+	for _, kv := range pairs {
 		if !strings.HasPrefix(kv, normPrefix) {
 			continue
 		}
@@ -28,9 +31,9 @@ func LoadFromEnv(prefix string) application.HookMap {
 		}
 
 		var ok bool
-		var hook *application.HookDef
+		var hook *HookDef
 		if hook, ok = hookmap[section]; !ok {
-			hook = &application.HookDef{Name: section}
+			hook = &HookDef{Name: section}
 			hookmap[section] = hook
 		}
 		assignParamValue(hook, key, value)
@@ -39,7 +42,7 @@ func LoadFromEnv(prefix string) application.HookMap {
 	return hookmap
 }
 
-func assignParamValue(def *application.HookDef, param, value string) {
+func assignParamValue(def *HookDef, param, value string) {
 	switch param {
 	case "accept_url_regex":
 		def.AcceptUrlRegex = value

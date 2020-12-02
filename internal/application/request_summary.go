@@ -43,10 +43,11 @@ func NewSummaryFromHttp(req *http.Request) (*RequestSummary, error) {
 	ct := req.Header.Get("Content-Type")
 	if ct == "application/json" {
 		var jsonErr error
-		summary.Body, jsonErr = geJsonBodyData(req.Body)
+		summary.Body, jsonErr = getJsonBodyData(req.Body)
 		if jsonErr != nil {
 			return nil, jsonErr
 		}
+		defer req.Body.Close()
 	} else {
 		formErr := req.ParseMultipartForm(1 * 1024 * 1024 * 1024)
 
@@ -66,12 +67,11 @@ func NewSummaryFromHttp(req *http.Request) (*RequestSummary, error) {
 	return &summary, nil
 }
 
-func geJsonBodyData(body io.ReadCloser) (interface{}, error) {
+func getJsonBodyData(body io.Reader) (interface{}, error) {
 	reqBody, reqReadErr := ioutil.ReadAll(body)
 	if reqReadErr != nil {
 		return nil, reqReadErr
 	}
-	defer body.Close()
 
 	data := make(map[string]interface{})
 	jsonErr := json.Unmarshal(reqBody, &data)
