@@ -31,7 +31,7 @@ func NewSummaryFromHttp(req *http.Request) (*RequestSummary, error) {
 		Body:       make(map[string]string),
 		Scheme:     req.URL.Scheme,
 		User:       req.URL.User.Username(),
-		Hostname:   req.URL.Hostname(),
+		Hostname:   req.Host,
 		Path:       req.URL.Path,
 		Fragment:   req.URL.Fragment,
 		Query:      req.URL.Query(),
@@ -51,7 +51,7 @@ func NewSummaryFromHttp(req *http.Request) (*RequestSummary, error) {
 	} else {
 		formErr := req.ParseMultipartForm(1 * 1024 * 1024 * 1024)
 
-		if formErr != nil {
+		if formErr != nil && formErr != http.ErrNotMultipart {
 			return nil, formErr
 		}
 

@@ -68,12 +68,6 @@ func TestParseFirstLine(t *testing.T) {
 			"",
 			errors.New("key cannot be empty:  /some/value"),
 		},
-		{
-			"/some/value",
-			"",
-			"",
-			errors.New("key name contains invalid characters: /some/value"),
-		},
 	}
 
 	for _, tt := range tests {

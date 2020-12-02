@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  hhgw:
+    build: ../..
+    ports:
+      - 8080:8080
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.hhgw-router.rule=Host(`${ROUTER_HOST}`) || Host(`hhgw.loc`)
+      - traefik.http.routers.hhgw-router.service=hhgw-service
+      - traefik.http.services.hhgw-service.loadbalancer.server.port=8080
+    environment:
+      - hhgw.icinga.accept_url_regex=.*
+      - hhgw.icinga.proxy_host=https://enmdgw006v23i.x.pipedream.net
+      - hhgw.icinga.request_file=/requests/icinga.request
+      - hhgw.mattermost.accept_url_regex=.*
+      - hhgw.mattermost.proxy_host=https://enmdgw006v23i.x.pipedream.net
+      - hhgw.mattermost.request_file=/requests/mm.request
+    volumes:
+      - .:/requests
+    networks: [ traefik-network ]
+networks:
+  traefik-network:
+    external: true

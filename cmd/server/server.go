@@ -16,7 +16,9 @@ func main() {
 		log.Fatal(err)
 	}
 
+	addr := ":8080"
+	logger.Info("Starting web server at " + addr)
 	http.HandleFunc("/", app.RootHandler)
-	err := http.ListenAndServe(":8080", nil)
+	err := http.ListenAndServe(addr, nil)
 	log.Fatal(err)
 }

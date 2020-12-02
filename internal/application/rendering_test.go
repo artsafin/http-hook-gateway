@@ -70,6 +70,24 @@ func TestInterpolateRequestfile(t *testing.T) {
 			),
 			err: nil,
 		},
+		{
+			args: args{
+				src: requestfile.NewDto(
+					"{{ if 0 }}{{ .Method }}{{ end }}",
+					`/proxied/path`,
+					map[string]string{},
+					`{"foo": 1 }`,
+				),
+				data: &testJsonInputReq,
+			},
+			want: requestfile.NewDto(
+				"GET",
+				`/proxied/path`,
+				map[string]string{},
+				`{"foo": 1 }`,
+			),
+			err: ErrSkipRequest,
+		},
 	}
 	for ti, tt := range tests {
 		t.Run(fmt.Sprintf("test #%v", ti), func(t *testing.T) {
@@ -80,7 +98,9 @@ func TestInterpolateRequestfile(t *testing.T) {
 				return
 			}
 
-			assert.Equal(t, tt.want, got)
+			if err == nil {
+				assert.Equal(t, tt.want, got)
+			}
 		})
 	}
 }

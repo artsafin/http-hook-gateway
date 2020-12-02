@@ -2,6 +2,7 @@ package application
 
 import (
 	"encoding/json"
+	"errors"
 	"http-hook-gateway/internal/requestfile"
 	"io"
 	"io/ioutil"
@@ -9,10 +10,16 @@ import (
 	"text/template"
 )
 
+var ErrSkipRequest = errors.New("request is skipped")
+
 func interpolateRequestfile(src requestfile.RequestFile, data *RequestSummary) (requestfile.RequestFile, error) {
 	method, methodErr := renderString("method", src.Method(), data)
 	if methodErr != nil {
 		return nil, methodErr
+	}
+
+	if len(method) == 0 {
+		return nil, ErrSkipRequest
 	}
 
 	path, pathErr := renderString("path", src.Path("/"), data)

@@ -19,7 +19,7 @@ type HookDef struct {
 func (d *HookDef) MatchesAcceptUrl(acceptUrl string) bool {
 	matches, err := regexp.Match(d.AcceptUrlRegex, []byte(acceptUrl))
 
-	return err != nil && matches
+	return err == nil && matches
 }
 
 func (d *HookDef) ParseRequest(req *http.Request) (requestfile.RequestFile, error) {

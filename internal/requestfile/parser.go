@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"errors"
 	"io"
-	"regexp"
 	"strings"
 )
 
@@ -123,11 +122,6 @@ func parseFirstLine(line string) (method, path string, err error) {
 
 	if len(method) == 0 {
 		return "", "", errors.New("key cannot be empty: " + line)
-	}
-
-	methodMatched, reErr := regexp.Match("^[a-zA-Z]+$", []byte(method))
-	if !methodMatched || reErr != nil {
-		return "", "", errors.New("key name contains invalid characters: " + line)
 	}
 
 	return
