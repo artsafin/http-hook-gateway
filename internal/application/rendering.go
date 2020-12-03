@@ -6,6 +6,7 @@ import (
 	"http-hook-gateway/internal/requestfile"
 	"io"
 	"io/ioutil"
+	"os"
 	"strings"
 	"text/template"
 )
@@ -59,6 +60,9 @@ func newTpl(name string) *template.Template {
 		},
 		"headervalues": func(data *RequestSummary, name string) string {
 			return strings.Join(data.Headers.Values(name), "; ")
+		},
+		"env": func(key string) string {
+			return os.Getenv(key)
 		},
 	})
 }
