@@ -35,7 +35,7 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
         registry: docker.pkg.github.com
-        repository: artsafin/hhgw/hhgw
+        repository: artsafin/http-hook-gateway/hhgw
         tag_with_ref: true
         path: .
         dockerfile: Dockerfile
