@@ -14,9 +14,9 @@ services:
       - hhgw.icinga.accept_url_regex=.*
       - hhgw.icinga.proxy_host=https://enmdgw006v23i.x.pipedream.net
       - hhgw.icinga.request_file=/requests/icinga.request
-      - hhgw.mattermost.accept_url_regex=.*
-      - hhgw.mattermost.proxy_host=https://enmdgw006v23i.x.pipedream.net
-      - hhgw.mattermost.request_file=/requests/mm.request
+#      - hhgw.mattermost.accept_url_regex=.*
+#      - hhgw.mattermost.proxy_host=https://enmdgw006v23i.x.pipedream.net
+#      - hhgw.mattermost.request_file=/requests/mm.request
     volumes:
       - .:/requests
     networks: [ traefik-network ]

@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	logger, _ := zap.NewDevelopment()
+	logger, _ := zap.NewDevelopment(zap.WithCaller(false))
 	defer logger.Sync()
 
 	app := application.NewApp(logger)

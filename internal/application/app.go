@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -74,16 +75,19 @@ func (app *app) RootHandler(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	wg := sync.WaitGroup{}
+	wg.Add(len(hooks))
 	hookNames := make([]string, 0, len(hooks))
 	for _, hook := range hooks {
 		hookNames = append(hookNames, hook.Name)
-		go app.proxy(req, hook)
+		go app.proxy(req, hook, &wg)
 	}
+	wg.Wait()
 
 	w.Header().Set("X-Hooks-Count", strconv.Itoa(len(hookNames)))
 	w.Header().Set("X-Hooks", strings.Join(hookNames, "; "))
 	w.WriteHeader(http.StatusCreated)
 
 	// We don't wait for the results of all hooks execution - we don't care
-	logger.Info("Finished handling", zap.String("path", req.URL.Path))
+	logger.Info("Finished handling")
 }

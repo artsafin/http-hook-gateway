@@ -7,19 +7,26 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+	"sync"
 )
 
-func (app *app) proxy(req *http.Request, hookDef *HookDef) (Err error) {
-	logger := app.logger.Named(fmt.Sprintf("%v %v %v", hookDef.Name, hookDef.ProxyHost, req.URL.Path))
+const (
+	UserAgent = "hhgw/1.0"
+)
+
+func (app *app) proxy(req *http.Request, hookDef *HookDef, wg *sync.WaitGroup) (Err error) {
+	logger := app.logger.Named(fmt.Sprintf("%v %v", hookDef.Name, req.URL.Path))
 
 	defer func() {
 		if Err != nil {
-			logger.Error("error", zap.Error(Err))
-		} else {
-			logger.Info("end")
+			logger.
+				WithOptions(zap.AddCallerSkip(1)).
+				Error("error", zap.Error(Err))
 		}
+
+		wg.Done()
 	}()
-	logger.Info("begin")
+	logger.Info("begin", zap.String("proxy_host", hookDef.ProxyHost))
 
 	hook, parseErr := hookDef.ParseRequest(req)
 
@@ -39,7 +46,6 @@ func (app *app) proxy(req *http.Request, hookDef *HookDef) (Err error) {
 	)
 
 	body, _ := ioutil.ReadAll(hook.Body())
-	logger.Debug("body", zap.ByteString("body", body))
 
 	proxyReq, reqCreateErr := http.NewRequest(hook.Method(), url, bytes.NewBuffer(body))
 	if reqCreateErr != nil {
@@ -49,6 +55,7 @@ func (app *app) proxy(req *http.Request, hookDef *HookDef) (Err error) {
 	for name, val := range hook.Headers() {
 		proxyReq.Header.Set(name, val)
 	}
+	proxyReq.Header.Set("User-Agent", UserAgent)
 
 	resp, reqErr := app.httpClient.Do(proxyReq)
 	if reqErr != nil {
