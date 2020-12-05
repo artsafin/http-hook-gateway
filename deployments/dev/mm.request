@@ -5,5 +5,5 @@ X-File: mm.request
 {
     "foo": 1,
     "bar": 2,
-    "env": "{{ env "TESTENV" }}"
+    "env": {{ env "TESTENV" | json }}
 }
