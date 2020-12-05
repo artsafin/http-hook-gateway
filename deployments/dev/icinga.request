@@ -1,5 +1,5 @@
 POST /icinga
 Content-Type: application/json
-X-Custom-Header: 1
+X-File: icinga.request
 
 {{ json .Body }}

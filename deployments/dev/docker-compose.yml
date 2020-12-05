@@ -11,12 +11,13 @@ services:
       - traefik.http.routers.hhgw-router.service=hhgw-service
       - traefik.http.services.hhgw-service.loadbalancer.server.port=8080
     environment:
-      - hhgw.icinga.accept_url_regex=.*
+      - TESTENV=123
+      - hhgw.icinga.accept_url_regex=^/icinga
       - hhgw.icinga.proxy_host=https://enmdgw006v23i.x.pipedream.net
       - hhgw.icinga.request_file=/requests/icinga.request
-#      - hhgw.mattermost.accept_url_regex=.*
-#      - hhgw.mattermost.proxy_host=https://enmdgw006v23i.x.pipedream.net
-#      - hhgw.mattermost.request_file=/requests/mm.request
+      - hhgw.mattermost.accept_url_regex=^/mm
+      - hhgw.mattermost.proxy_host=https://enmdgw006v23i.x.pipedream.net
+      - hhgw.mattermost.request_file=/requests/mm.request
     volumes:
       - .:/requests
     networks: [ traefik-network ]

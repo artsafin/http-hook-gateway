@@ -1,8 +1,9 @@
-PUT /mmpath
+PUT /mm
 Content-Type: application/json
-X-Custom-Header: 2
+X-File: mm.request
 
 {
     "foo": 1,
-    "bar": 2
+    "bar": 2,
+    "env": "{{ env "TESTENV" }}"
 }
