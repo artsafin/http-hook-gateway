@@ -23,7 +23,7 @@ func interpolateRequestfile(src requestfile.RequestFile, data *RequestSummary) (
 		return nil, ErrSkipRequest
 	}
 
-	path, pathErr := renderString("path", src.Path("/"), data)
+	path, pathErr := renderString("path", src.Path(""), data)
 	if pathErr != nil {
 		return nil, pathErr
 	}

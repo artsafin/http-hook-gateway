@@ -21,7 +21,7 @@ func (r dto) Method() string {
 }
 
 func (r dto) Path(defaultPath string) string {
-	if r.path == "" {
+	if len(r.path) == 0 {
 		return defaultPath
 	}
 	return r.path
